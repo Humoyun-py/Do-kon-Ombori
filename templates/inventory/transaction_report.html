@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Operatsiya Hisoboti - Do'kon Omborini Boshqarish{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">📋 Operatsiya Tarixchasi va Hisoboti</h5>
+    </div>
+
+    <div class="card-body">
+        <!-- Filter Form -->
+        <form method="get" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label">Boshlanish Sanasi</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label">Tugash Sanasi</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="type" class="form-label">Operatsiya Turi</label>
+                    <select class="form-select" id="type" name="type">
+                        <option value="">📌 Barchasi</option>
+                        <option value="income" {% if request.GET.type == 'income' %}selected{% endif %}>➕ Kirim</option>
+                        <option value="outcome" {% if request.GET.type == 'outcome' %}selected{% endif %}>➖ Chiqim</option>
+                        <option value="adjustment" {% if request.GET.type == 'adjustment' %}selected{% endif %}>🔧 Sozlash</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-primary form-control">🔍 Filtrlash</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                {% with income_count=transactions|length %}
+                {% if request.GET.type == 'income' or not request.GET.type %}
+                    <div class="card stat-card" style="border-top: 3px solid #28a745;">
+                        <h6 class="card-title">➕ Jami Kirimlar</h6>
+                        <div class="stat-number" style="color: #28a745;">
+                            {% load django_filters %}
+                            {% for t in transactions %}
+                                {% if t.transaction_type == 'income' %}1{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card" style="border-top: 3px solid #dc3545;">
+                    <h6 class="card-title">➖ Jami Chiqimlar</h6>
+                    <div class="stat-number" style="color: #dc3545;">
+                        {% for t in transactions %}
+                            {% if t.transaction_type == 'outcome' %}1{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card" style="border-top: 3px solid #667eea;">
+                    <h6 class="card-title">📊 Jami Operatsiyalar</h6>
+                    <div class="stat-number">{{ transactions|length }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="table-responsive">
+            {% if transactions %}
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sana</th>
+                        <th>Mahsulot</th>
+                        <th>Turi</th>
+                        <th>Miqdori</th>
+                        <th>Vosita Raqami</th>
+                        <th>Ijro Etuvchi</th>
+                        <th>Izohlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>
+                            <small>{{ transaction.created_at|date:"d.m.Y H:i" }}</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'product_detail' transaction.product.id %}">
+                                <strong>{{ transaction.product.name }}</strong>
+                            </a><br>
+                            <code>{{ transaction.product.code }}</code>
+                        </td>
+                        <td>
+                            {% if transaction.transaction_type == 'income' %}
+                                <span class="badge bg-success">➕ Kirim</span>
+                            {% elif transaction.transaction_type == 'outcome' %}
+                                <span class="badge bg-danger">➖ Chiqim</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">🔧 Sozlash</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>
+                                {% if transaction.transaction_type == 'income' %}
+                                    <span style="color: #28a745;">+{{ transaction.quantity }}</span>
+                                {% elif transaction.transaction_type == 'outcome' %}
+                                    <span style="color: #dc3545;">-{{ transaction.quantity }}</span>
+                                {% else %}
+                                    {{ transaction.quantity }}
+                                {% endif %}
+                            </strong>
+                            {{ transaction.product.unit }}
+                        </td>
+                        <td>
+                            {% if transaction.reference_number %}
+                                <code>{{ transaction.reference_number }}</code>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ transaction.created_by.first_name|default:transaction.created_by.username }}
+                        </td>
+                        <td>
+                            {% if transaction.notes %}
+                                <small>{{ transaction.notes|truncatewords:5 }}</small>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                ℹ️ Operatsiya topilmadi. Yangi operatsiya qo'shish uchun mahsulotlarni tanlang.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Export Options (for future enhancement) -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">💾 Export Opsiyalari</h6>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-outline-success" disabled>
+                    📊 CSV sifatida yuklab olish
+                </button>
+                <button class="btn btn-outline-danger" disabled>
+                    📖 PDF sifatida chop etish
+                </button>
+                <button class="btn btn-outline-info" disabled>
+                    📧 Email orqali yuborish
+                </button>
+                <small class="text-muted d-block mt-2">
+                    * Bu xususiyatlar yaqinda qo'shiladi
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

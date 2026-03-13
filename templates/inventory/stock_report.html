@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Qoldiq Hisoboti - Do'kon Omborini Boshqarish{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">📈 Ombor Qoldiq Hisoboti</h5>
+    </div>
+
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card" style="border-top: 3px solid #667eea;">
+                    <h6 class="card-title">📦 Jami Mahsulotlar</h6>
+                    <div class="stat-number">{{ total_products }}</div>
+                    <div class="stat-label">Faol mahsulotlar</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card" style="border-top: 3px solid #ffc107;">
+                    <h6 class="card-title">⚠️ Kam Qolgan</h6>
+                    <div class="stat-number" style="color: #ffc107;">{{ low_stock.count }}</div>
+                    <div class="stat-label">Minimal darajadan past</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card" style="border-top: 3px solid #dc3545;">
+                    <h6 class="card-title">❌ Tugagan</h6>
+                    <div class="stat-number" style="color: #dc3545;">{{ out_of_stock.count }}</div>
+                    <div class="stat-label">Qoldiq 0 (nol)</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card" style="border-top: 3px solid #28a745;">
+                    <h6 class="card-title">✅ Yetarli</h6>
+                    <div class="stat-number" style="color: #28a745;">{{ products|length|add:"-"|add:low_stock.count|add:"-"|add:out_of_stock.count }}</div>
+                    <div class="stat-label">Normal holatda</div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
+                    📦 Barcha Mahsulotlar ({{ total_products }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="low-tab" data-bs-toggle="tab" data-bs-target="#low" type="button" role="tab">
+                    ⚠️ Kam Qolgan ({{ low_stock.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="out-tab" data-bs-toggle="tab" data-bs-target="#out" type="button" role="tab">
+                    ❌ Tugagan ({{ out_of_stock.count }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Barcha Mahsulotlar -->
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nomi</th>
+                                <th>Kod</th>
+                                <th>Kategoriya</th>
+                                <th>Joriy Qoldiq</th>
+                                <th>Minimal</th>
+                                <th>Narx</th>
+                                <th>Status</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td><strong>{{ product.name }}</strong></td>
+                                <td><code>{{ product.code }}</code></td>
+                                <td><span class="badge bg-info">{{ product.category.name }}</span></td>
+                                <td>
+                                    <strong>{{ product.quantity }}</strong> {{ product.unit }}
+                                </td>
+                                <td>{{ product.min_stock }} {{ product.unit }}</td>
+                                <td>{{ product.price }} so'</td>
+                                <td>
+                                    {% if product.quantity == 0 %}
+                                        <span class="badge bg-danger">❌ Tugagan</span>
+                                    {% elif product.is_low_stock %}
+                                        <span class="badge bg-warning text-dark">⚠️ Kam</span>
+                                    {% else %}
+                                        <span class="badge bg-success">✅ Yetarli</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-info">👁️</a>
+                                    <a href="{% url 'add_transaction' product.id %}" class="btn btn-sm btn-primary">➕</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Kam Qolgan -->
+            <div class="tab-pane fade" id="low" role="tabpanel">
+                {% if low_stock %}
+                <div class="alert alert-warning" role="alert">
+                    <strong>⚠️ E'tibor!</strong> Quyidagi mahsulotlarning qoldig'i minimal darajadan past:
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nomi</th>
+                                <th>Kod</th>
+                                <th>Joriy</th>
+                                <th>Minimal</th>
+                                <th>Yetishmayotgan</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in low_stock %}
+                            <tr class="table-warning">
+                                <td><strong>{{ product.name }}</strong></td>
+                                <td><code>{{ product.code }}</code></td>
+                                <td><strong>{{ product.quantity }}</strong></td>
+                                <td>{{ product.min_stock }}</td>
+                                <td>
+                                    <span class="badge bg-danger">
+                                        {{ product.min_stock|add:"-"|add:product.quantity }} ta
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'add_transaction' product.id %}" class="btn btn-sm btn-success">➕ Kirim</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success" role="alert">
+                    ✅ Barcha mahsulotlar minimal darajada yetarlidir!
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tugagan -->
+            <div class="tab-pane fade" id="out" role="tabpanel">
+                {% if out_of_stock %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>❌ Xavf!</strong> Quyidagi mahsulotlar tugab qolgan:
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nomi</th>
+                                <th>Kod</th>
+                                <th>Kategoriya</th>
+                                <th>Nominal Qoldiq</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in out_of_stock %}
+                            <tr class="table-danger">
+                                <td><strong>{{ product.name }}</strong></td>
+                                <td><code>{{ product.code }}</code></td>
+                                <td><span class="badge bg-secondary">{{ product.category.name }}</span></td>
+                                <td>{{ product.min_stock }} {{ product.unit }}</td>
+                                <td>
+                                    <a href="{% url 'add_transaction' product.id %}" class="btn btn-sm btn-success">➕ Kirim Qilish</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success" role="alert">
+                    ✅ Tugagan mahsulotlar yo'q!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">💡 Ko'rsatmalar</h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li><strong>✅ Yetarli:</strong> Mahsulotning qoldig'i minimal darajada yoki undan yuqori</li>
+                    <li><strong>⚠️ Kam:</strong> Mahsulotning qoldig'i minimal darajadan past</li>
+                    <li><strong>❌ Tugagan:</strong> Mahsulotning qoldig'i nolga teng</li>
+                    <li><strong>➕ Kirim tugmasi:</strong> Mahsulot omborda qo'shish uchun bosing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

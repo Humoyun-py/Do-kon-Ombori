@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Operatsiya Qo'shish - Do'kon Omborini Boshqarish{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">➕ Operatsiya Qo'shish</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="alert alert-info" role="alert">
+                    <strong>📦 Mahsulot:</strong> {{ product.name }}<br>
+                    <strong>📊 Joriy Qoldiq:</strong> {{ product.quantity }} {{ product.unit }}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.transaction_type.id_for_label }}" class="form-label">Operatsiya Turi *</label>
+                        {{ form.transaction_type }}
+                        <small class="text-muted d-block mt-1">
+                            ➕ Kirim: mahsulot omborga kiritiladi<br>
+                            ➖ Chiqim: mahsulot ombordan chiqariladi
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.quantity.id_for_label }}" class="form-label">Miqdori *</label>
+                        {{ form.quantity }}
+                        <small class="text-muted d-block mt-1">{{ product.unit }} da kiriting</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.reference_number.id_for_label }}" class="form-label">Tashkilot Raqami</label>
+                        {{ form.reference_number }}
+                        <small class="text-muted d-block mt-1">Misol: HAD001, PO-123, Invoice#456</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">Izohlar</label>
+                        {{ form.notes }}
+                        <small class="text-muted d-block mt-1">Qo'shimcha ma'lumot qo'shish mumkin</small>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="alert alert-warning" role="alert">
+                        <strong>⚠️ E'tibor!</strong><br>
+                        Operatsiya tasdiqlangandan keyin qoldiq avtomatik ravishda yangilanib ketadi.
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">✅ Tasdiqlash va Saqlash</button>
+                        <a href="{% url 'product_detail' product.id %}" class="btn btn-secondary">❌ Bekor Qilish</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

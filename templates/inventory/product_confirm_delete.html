@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Mahsulotni O'chirish - Do'kon Omborini Boshqarish{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">⚠️ Mahsulotni O'chirishni Tasdiqlang</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="alert alert-danger" role="alert">
+                    <strong>❌ DIQQAT!</strong><br>
+                    Bu amaldan keyin mahsulot va uning barcha operatsiya tarixchasi butunlay o'chib ketadi.
+                    Bu amalni qaytarish mumkin emas!
+                </div>
+
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <h6>O'chirilayotgan Mahsulot:</h6>
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <th>Nomi:</th>
+                                <td><strong>{{ object.name }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Kod:</th>
+                                <td><code>{{ object.code }}</code></td>
+                            </tr>
+                            <tr>
+                                <th>Kategoriya:</th>
+                                <td>{{ object.category.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Joriy Qoldiq:</th>
+                                <td>{{ object.quantity }} {{ object.unit }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="confirm" name="confirm" required>
+                        <label class="form-check-label" for="confirm">
+                            ✅ Men tushundim va bu amaldan keyin mahsulot o'chib ketadi
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            🗑️ Ha, Mahsulotni O'chir
+                        </button>
+                        <a href="{% url 'product_detail' object.id %}" class="btn btn-secondary">
+                            ❌ Bekor Qilish
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">💡 Maslahat</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-1">Mahsulotni butunlay o'chirish o'rniga:</p>
+                <ul class="mb-0">
+                    <li>Mahsulotni "faol emasga" o'zgartirish mumkin</li>
+                    <li>Mahsulot tarixchasi saqlanib qoladi</li>
+                    <li>Keyin qayta faollashtirishingiz mumkin</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

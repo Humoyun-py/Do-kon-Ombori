@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Bosh Sahifa - Do'kon Omborini Boshqarish{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <h6 class="card-title">📦 Jami Mahsulotlar</h6>
+            <div class="stat-number">{{ total_products }}</div>
+            <div class="stat-label">Aktiv mahsulotlar</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card" style="border-top: 3px solid #ffc107;">
+            <h6 class="card-title">⚠️ Kam Qolgan</h6>
+            <div class="stat-number" style="color: #ffc107;">{{ low_stock_products }}</div>
+            <div class="stat-label">Minimal darajadan past</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card" style="border-top: 3px solid #dc3545;">
+            <h6 class="card-title">❌ Tugagan</h6>
+            <div class="stat-number" style="color: #dc3545;">{{ out_of_stock }}</div>
+            <div class="stat-label">Qoldiq 0 (nol)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card" style="border-top: 3px solid #28a745;">
+            <h6 class="card-title">✅ Kirimlar</h6>
+            <div class="stat-number" style="color: #28a745;">{{ income_transactions }}</div>
+            <div class="stat-label">Oxirgi 30 kun</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">📋 Oxirgi Operatsiyalar</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_transactions %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mahsulot</th>
+                                <th>Turi</th>
+                                <th>Miqdori</th>
+                                <th>Vaqti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in recent_transactions %}
+                            <tr>
+                                <td>{{ transaction.product.name }}</td>
+                                <td>
+                                    {% if transaction.transaction_type == 'income' %}
+                                    <span class="badge bg-success">Kirim</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Chiqim</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ transaction.quantity }}</td>
+                                <td><small>{{ transaction.created_at|date:"d.m.Y H:i" }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Operatsiya topilmadi</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">🏷️ Kategoriyalar</h5>
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                <ul class="list-group list-group-flush">
+                    {% for category in categories %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="?category={{ category.id }}">{{ category.name }}</a>
+                        <span class="badge bg-primary rounded-pill">{{ category.products.count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Kategoriya topilmadi</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">⚡ Tezkor Amallar</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'product_create' %}" class="btn btn-primary me-2">➕ Yangi Mahsulot</a>
+                <a href="{% url 'stock_report' %}" class="btn btn-info me-2">📊 Qoldiq Hisoboti</a>
+                <a href="{% url 'transaction_report' %}" class="btn btn-warning">📋 Operatsiyalar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
