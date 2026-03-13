@@ -175,9 +175,17 @@ def transaction_report(request):
     if trans_type:
         transactions = transactions.filter(transaction_type=trans_type)
     
+    # Calculate statistics
+    income_count = transactions.filter(transaction_type='income').count()
+    outcome_count = transactions.filter(transaction_type='outcome').count()
+    adjustment_count = transactions.filter(transaction_type='adjustment').count()
+    
     context = {
         'transactions': transactions,
         'start_date': start_date,
-        'end_date': end_date
+        'end_date': end_date,
+        'income_count': income_count,
+        'outcome_count': outcome_count,
+        'adjustment_count': adjustment_count
     }
     return render(request, 'inventory/transaction_report.html', context)

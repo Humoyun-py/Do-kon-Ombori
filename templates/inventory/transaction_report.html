@@ -39,28 +39,15 @@
         <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-md-4">
-                {% with income_count=transactions|length %}
-                {% if request.GET.type == 'income' or not request.GET.type %}
-                    <div class="card stat-card" style="border-top: 3px solid #28a745;">
-                        <h6 class="card-title">➕ Jami Kirimlar</h6>
-                        <div class="stat-number" style="color: #28a745;">
-                            {% load django_filters %}
-                            {% for t in transactions %}
-                                {% if t.transaction_type == 'income' %}1{% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
-                {% endwith %}
+                <div class="card stat-card" style="border-top: 3px solid #28a745;">
+                    <h6 class="card-title">➕ Jami Kirimlar</h6>
+                    <div class="stat-number" style="color: #28a745;">{{ income_count }}</div>
+                </div>
             </div>
             <div class="col-md-4">
                 <div class="card stat-card" style="border-top: 3px solid #dc3545;">
                     <h6 class="card-title">➖ Jami Chiqimlar</h6>
-                    <div class="stat-number" style="color: #dc3545;">
-                        {% for t in transactions %}
-                            {% if t.transaction_type == 'outcome' %}1{% endif %}
-                        {% endfor %}
-                    </div>
+                    <div class="stat-number" style="color: #dc3545;">{{ outcome_count }}</div>
                 </div>
             </div>
             <div class="col-md-4">
