@@ -4,9 +4,13 @@ Django settings for warehouse project.
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Try to load dotenv if available (optional for production)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
